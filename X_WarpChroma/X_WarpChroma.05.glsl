@@ -1,5 +1,5 @@
 uniform float adsk_result_w, adsk_result_h;
-uniform sampler2D WarpStrength, adsk_results_pass1;
+uniform sampler2D WarpStrength;
 
 void main()
 {

@@ -2,7 +2,7 @@
 
 uniform float adsk_result_w, adsk_result_h;
 uniform float adsk_result_frameratio;
-uniform sampler2D adsk_results_pass2, adsk_results_pass1, adsk_results_pass3, adsk_results_pass4;
+uniform sampler2D adsk_results_pass2, adsk_results_pass1, adsk_results_pass3, adsk_results_pass4, adsk_results_pass5;
 uniform vec2 position;
 uniform vec2 center;
 uniform float radius;
@@ -11,7 +11,7 @@ uniform float scale;
 uniform float rotation;
 uniform int transform_order;
 uniform bool hardmatte;
-uniform bool result;
+uniform int result;
 uniform bool input_premult;
 uniform bool comp_over_front;
 uniform bool repeat_texture;
@@ -84,14 +84,26 @@ vec2 get_coords(float multiplier) {
 	return coords;
 }
 
-vec4 warp(int texture_source, float multiplier) {
-	vec2 coords = get_coords(multiplier);
+vec4 warp() {
+	float warper = texture2D(adsk_results_pass5, st).r;
+
+	vec2 coords = get_coords(warper);
 	vec4 warped = vec4(0.0);
 
-	if (texture_source == 0) {
-   		warped = texture2D(adsk_results_pass1, coords);
-	} else if (texture_source == 1) {
-   		warped = texture2D(adsk_results_pass4, coords);
+	if (repeat_texture) {
+  		warped = texture2D(adsk_results_pass4, coords);
+
+		if (result == 0) {
+   			warped = texture2D(adsk_results_pass1, coords);
+		}
+	} else {
+		if (isInTex(coords)) {
+  			warped = texture2D(adsk_results_pass4, coords);
+	
+			if (result == 0) {
+   				warped = texture2D(adsk_results_pass1, coords);
+			}
+		}
 	}
 
 	return warped;
@@ -100,9 +112,7 @@ vec4 warp(int texture_source, float multiplier) {
 
 void main()
 {
-    vec4 front = texture2D(adsk_results_pass1, st);
     vec4 matte = texture2D(adsk_results_pass3, st);
-	vec4 warp_input = texture2D(adsk_results_pass2, st);
 
 	float tol = 1.0;
 
@@ -119,34 +129,29 @@ void main()
 		}
 	}
 
+	tmp = clamp(tmp, 0.0, 1.0);
 
-    vec4 premult = front * (1.0 - tmp);
 
 	vec4 warped = vec4(0.0);
 	vec4 comp = vec4(0.0);
 
-	int source = 0;
+	warped = warp();
 
-	if (input_premult) {
-		source = 1;	
-	}
+	comp = warped;
 
-	if (repeat_texture) {
-		warped = warp(source, warp_input.r);
-	} else {
-		if (isInTex(get_coords(warp_input.r))) {
-			warped = warp(source, warp_input.r);
-		}
-	}
-
-	comp = warped * tmp.a + front * (1.0 - tmp.a);
-
-	if (comp_over_front) {
-		comp = comp * comp.a + front * (1.0 - comp.a);
+	if (result == 1) {
+    	vec4 back = texture2D(adsk_results_pass2, st);
+		comp = comp * comp.a + back * (1.0 - comp.a);
 		if (comp.a != 1.0) {
-			comp.rgb = front.rgb;
+			comp.rgb = back.rgb;
 		}
-	}
+	} else  if (result == 2) {
+		vec4 front = texture2D(adsk_results_pass1, st);
+        comp = comp * comp.a + front * (1.0 - comp.a);
+        if (comp.a != 1.0) {
+            comp.rgb = front.rgb;
+        }
+    }
 
 	gl_FragColor = comp;
 }
