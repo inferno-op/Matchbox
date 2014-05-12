@@ -11,7 +11,7 @@ uniform float scale;
 uniform float rotation;
 uniform int transform_order;
 uniform bool hardmatte;
-uniform bool output;
+uniform bool result;
 uniform bool input_premult;
 uniform bool comp_over_front;
 uniform bool repeat_texture;
