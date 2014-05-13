@@ -14,13 +14,13 @@ void main( void ) {
         //float FXAA_REDUCE_MUL = 1.0/8.0;
         //float FXAA_REDUCE_MIN = 1.0/128.0;
 
-        vec3 rgbNW=texture2D(adsk_results_pass6,texCoords+(vec2(-1.0,-1.0)/frameBufSize)).xyz;
-        vec3 rgbNE=texture2D(adsk_results_pass6,texCoords+(vec2(1.0,-1.0)/frameBufSize)).xyz;
-        vec3 rgbSW=texture2D(adsk_results_pass6,texCoords+(vec2(-1.0,1.0)/frameBufSize)).xyz;
-        vec3 rgbSE=texture2D(adsk_results_pass6,texCoords+(vec2(1.0,1.0)/frameBufSize)).xyz;
-        vec3 rgbM=texture2D(adsk_results_pass6,texCoords).xyz;
+        vec4 rgbNW=texture2D(adsk_results_pass6,texCoords+(vec2(-1.0,-1.0)/frameBufSize));
+        vec4 rgbNE=texture2D(adsk_results_pass6,texCoords+(vec2(1.0,-1.0)/frameBufSize));
+        vec4 rgbSW=texture2D(adsk_results_pass6,texCoords+(vec2(-1.0,1.0)/frameBufSize));
+        vec4 rgbSE=texture2D(adsk_results_pass6,texCoords+(vec2(1.0,1.0)/frameBufSize));
+        vec4 rgbM=texture2D(adsk_results_pass6,texCoords);
         
-        vec3 luma=vec3(0.299, 0.587, 0.114);
+        vec4 luma=vec4(0.299, 0.587, 0.114, 1.0);
         float lumaNW = dot(rgbNW, luma);
         float lumaNE = dot(rgbNE, luma);
         float lumaSW = dot(rgbSW, luma);
@@ -44,18 +44,18 @@ void main( void ) {
                   max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
                   dir * rcpDirMin)) / frameBufSize;
                 
-        vec3 rgbA = (1.0/2.0) * (
-                texture2D(adsk_results_pass6, texCoords.xy + dir * (1.0/3.0 - 0.5)).xyz +
-                texture2D(adsk_results_pass6, texCoords.xy + dir * (2.0/3.0 - 0.5)).xyz);
-        vec3 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
-                texture2D(adsk_results_pass6, texCoords.xy + dir * (0.0/3.0 - 0.5)).xyz +
-                texture2D(adsk_results_pass6, texCoords.xy + dir * (3.0/3.0 - 0.5)).xyz);
+        vec4 rgbA = (1.0/2.0) * (
+                texture2D(adsk_results_pass6, texCoords.xy + dir * (1.0/3.0 - 0.5)) +
+                texture2D(adsk_results_pass6, texCoords.xy + dir * (2.0/3.0 - 0.5)));
+        vec4 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (
+                texture2D(adsk_results_pass6, texCoords.xy + dir * (0.0/3.0 - 0.5)) +
+                texture2D(adsk_results_pass6, texCoords.xy + dir * (3.0/3.0 - 0.5)));
         float lumaB = dot(rgbB, luma);
 
         if((lumaB < lumaMin) || (lumaB > lumaMax)){
-                gl_FragColor.xyz=rgbA;
+                gl_FragColor=rgbA;
         }else{
-                gl_FragColor.xyz=rgbB;
+                gl_FragColor=rgbB;
         }
 }
 

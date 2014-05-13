@@ -109,10 +109,10 @@ vec4 warp() {
 	return warped;
 }
 
-
 void main()
 {
     vec4 matte = texture2D(adsk_results_pass3, st);
+    vec4 premult = texture2D(adsk_results_pass4, st);
 
 	float tol = 1.0;
 
@@ -141,18 +141,19 @@ void main()
 
 	if (result == 1) {
     	vec4 back = texture2D(adsk_results_pass2, st);
-		comp = comp * comp.a + back * (1.0 - comp.a);
+		comp = comp + back * (1.0 - comp.a);
 		if (comp.a != 1.0) {
-			comp.rgb = back.rgb;
+			//comp.rgb = back.rgb;
 		}
 	} else  if (result == 2) {
 		vec4 front = texture2D(adsk_results_pass1, st);
-        comp = comp * comp.a + front * (1.0 - comp.a);
+        comp = comp + front * (1.0 - comp.a);
         if (comp.a != 1.0) {
-            comp.rgb = front.rgb;
+            //comp.rgb = front.rgb;
         }
     }
 
+	comp.a = warped.a;
 	gl_FragColor = comp;
 }
 
