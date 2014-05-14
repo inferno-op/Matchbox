@@ -142,16 +142,14 @@ void main()
 	if (result == 1) {
     	vec4 back = texture2D(adsk_results_pass2, st);
 		comp = comp + back * (1.0 - comp.a);
-		if (comp.a != 1.0) {
-			//comp.rgb = back.rgb;
-		}
 	} else  if (result == 2) {
 		vec4 front = texture2D(adsk_results_pass1, st);
         comp = comp + front * (1.0 - comp.a);
-        if (comp.a != 1.0) {
-            //comp.rgb = front.rgb;
-        }
-    }
+    } else if (result == 4) {
+		float warper = texture2D(adsk_results_pass5, st).r;
+		vec2 coords = get_coords(warper);
+		comp = vec4(coords.r, coords.g, 0.0, 0.0);
+	}
 
 	comp.a = warped.a;
 	gl_FragColor = comp;

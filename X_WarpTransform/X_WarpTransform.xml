@@ -57,6 +57,8 @@ miles@noesclavo.com" Name="X WarpTransform">
             </PopupEntry>
         <PopupEntry Title="Over Black" Value="3">
             </PopupEntry>
+        <PopupEntry Title="UVs" Value="4">
+            </PopupEntry>
       </Uniform>
 
 
