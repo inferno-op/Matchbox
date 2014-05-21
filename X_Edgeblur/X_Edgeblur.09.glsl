@@ -42,6 +42,5 @@ void main() {
 	}
 	a /= energy;
 
-
 	gl_FragColor = vec4(a);
 }
