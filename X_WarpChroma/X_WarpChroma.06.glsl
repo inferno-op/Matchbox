@@ -8,9 +8,12 @@ uniform float adsk_result_frameratio;
 uniform int samples;
 uniform vec2 center;
 uniform vec2 position;
+uniform vec2 shear_val;
 uniform float scale;
 uniform float rotation;
 uniform float barrel;
+uniform float radius;
+uniform float angle;
 uniform bool premult_input;
 uniform bool comp_over_front;
 uniform bool repeat_texture;
@@ -23,6 +26,46 @@ bool isInTex( const vec2 coords )
         return coords.x >= 0.0 && coords.x <= 1.0 &&
                     coords.y >= 0.0 && coords.y <= 1.0;
 }
+
+vec2 twirl(vec2 coords, vec2 center, float radius, float angle, float multiplier)
+{
+    angle *= multiplier;
+    coords -= center;
+
+    float dist = length(coords);
+
+    if (dist < radius) {
+        float percent = (radius - dist) / radius;
+        float theta = percent * percent * angle;
+        float s = sin(theta);
+        float c = cos(theta);
+        coords = vec2(dot(coords, vec2(c, -s)), dot(coords, vec2(s, c)));
+    }
+
+    coords += center;
+
+    return coords;
+}
+
+
+vec2 shear(vec2 coords, vec2 center, vec2 shear, float multiplier)
+{
+    vec2 s = shear * vec2(multiplier);
+
+    mat2 shear_mat = mat2(
+                        1.0, s.x, // st.x = st.x * 1.0 + st.y * shear.x
+                        s.y, 1.0 // st.y = st.x * shear.y + st.y * 1.0
+                        );
+
+    coords -= center;
+    coords.x *= adsk_result_frameratio;
+    coords *= shear_mat;
+    coords.x /= adsk_result_frameratio;
+    coords += center;
+
+    return coords;
+}
+
 
 vec2 barrel_distort(vec2 coords, vec2 center, float barrel, float multiplier)
 {
@@ -66,8 +109,10 @@ vec2 warp(vec2 coords, vec2 center, float t, float multiplier)
 {
 	coords = translate(coords, center,  position * t, multiplier);
 	coords = uniform_scale(coords, center, scale * t, multiplier);
+	coords = shear(coords, center, -shear_val * t, multiplier);
 	coords = barrel_distort(coords, center, -barrel * t, multiplier);
 	coords = rotate(coords, center, -rotation * t, multiplier);
+	coords = twirl(coords, center, radius * t, angle * t, multiplier);
 
 	return coords;
 }

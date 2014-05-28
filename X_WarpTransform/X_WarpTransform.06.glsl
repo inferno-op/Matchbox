@@ -8,6 +8,8 @@ uniform vec2 center;
 uniform float radius;
 uniform float angle;
 uniform float scale;
+uniform vec2 shear_val;
+uniform float barrel;
 uniform float rotation;
 uniform int transform_order;
 uniform bool hardmatte;
@@ -29,6 +31,33 @@ vec2 translate(vec2 coords, vec2 center, vec2 position, float multiplier)
 	position = position * vec2(multiplier);
     return coords - position;
 
+}
+
+vec2 barrel_distort(vec2 coords, vec2 center, float barrel, float multiplier)
+{
+    vec2 cc = coords - center;
+    float dist = dot(cc, cc);
+    coords = coords + cc * dist * barrel * multiplier;
+    return coords;
+}
+
+
+vec2 shear(vec2 coords, vec2 center, vec2 shear, float multiplier)
+{
+	vec2 s = shear * vec2(multiplier);
+
+	mat2 shear_mat = mat2(
+                        1.0, s.x, // st.x = st.x * 1.0 + st.y * shear.x
+                        s.y, 1.0 // st.y = st.x * shear.y + st.y * 1.0
+                    	);
+
+	coords -= center;
+    coords.x *= adsk_result_frameratio;
+    coords *= shear_mat;
+    coords.x /= adsk_result_frameratio;
+    coords += center;
+
+	return coords;
 }
 
 vec2 uniform_scale(vec2 coords, vec2 center, float scale, float multiplier)
@@ -78,6 +107,8 @@ vec2 get_coords(float multiplier) {
 
 	coords = translate(coords, center, position, multiplier);
 	coords = uniform_scale(coords, center, scale, multiplier);
+	coords = barrel_distort(coords, center, barrel, multiplier);
+	coords = shear(coords, center, shear_val, multiplier);
 	coords = rotate(coords, center, rotation, multiplier);
 	coords = twirl(coords, center, radius, angle, multiplier);
 

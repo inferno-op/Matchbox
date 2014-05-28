@@ -35,7 +35,10 @@ miles@noesclavo.com" Name="X WarpTransform">
       <Uniform InputColor="67, 77, 83" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_REPEAT" GL_TEXTURE_WRAP_S="GL_REPEAT" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="adsk_results_pass5">
       </Uniform>
 
-      <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="3" Col="1" Page="0" DisplayName="Twist Angle" Type="float" Name="angle">
+	<Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="2" Col="1" Page="0" DisplayName="Barrel Distort" Type="float" Name="barrel">
+      </Uniform>
+
+      <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="3" Col="2" Page="0" DisplayName="Twist Angle" Type="float" Name="angle">
       </Uniform>
 
       <Uniform Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Center" IconType="Pick" Type="vec2" Name="center">
@@ -48,7 +51,7 @@ miles@noesclavo.com" Name="X WarpTransform">
       <Uniform InputColor="67, 77, 83" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_REPEAT" GL_TEXTURE_WRAP_S="GL_REPEAT" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="adsk_results_pass1">
       </Uniform>
 
-	<Uniform Max="1000000" Min="-1000000" Default="0" Inc="1" Tooltip="" Row="1" Col="2" Page="0" DisplayName="Comp" Type="int" Name="result" ValueType="Popup">
+	<Uniform Max="1000000" Min="-1000000" Default="0" Inc="1" Tooltip="" Row="1" Col="3" Page="0" DisplayName="Comp" Type="int" Name="result" ValueType="Popup">
         <PopupEntry Title="Warped Only" Value="0">
             </PopupEntry>
         <PopupEntry Title="Over Back" Value="1">
@@ -62,20 +65,29 @@ miles@noesclavo.com" Name="X WarpTransform">
       </Uniform>
 
 
-      <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="2" Col="1" Page="0" DisplayName="Twist Radius" Type="float" Name="radius">
+      <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="2" Col="2" Page="0" DisplayName="Twist Radius" Type="float" Name="radius">
       </Uniform>
 
       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="0" Col="1" Page="0" DisplayName="Scale" Type="float" Name="scale">
       </Uniform>
 
-      <Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Repeat Texture" Type="bool" Name="repeat_texture">
+		<Uniform Inc="0.01" Tooltip="" Row="0" Col="2" Page="0" DisplayName="Shear" IconType="None" Type="vec2" Name="shear_val">
+         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0">
+         </SubUniform>
+         <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0">
+         </SubUniform>
       </Uniform>
+
+
 
       <Uniform Inc="0.01" Tooltip="" Row="0" Col="0" Page="0" DisplayName="Translation" IconType="None" Type="vec2" Name="position">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0">
          </SubUniform>
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0">
          </SubUniform>
+      </Uniform>
+
+      <Uniform Row="0" Col="3" Page="0" Default="False" Tooltip="" DisplayName="Repeat Texture" Type="bool" Name="repeat_texture">
       </Uniform>
 
       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="1" Col="1" Page="0" DisplayName="Rotation" Type="float" Name="rotation">
@@ -92,9 +104,13 @@ miles@noesclavo.com" Name="X WarpTransform">
       </Uniform>
    </Shader>
    <Page Name="Page 1" Page="0">
-      <Col Name="Column 1" Col="0" Page="0">
+      <Col Name="Translate" Col="0" Page="0">
       </Col>
-      <Col Name="Column 2" Col="1" Page="0">
+      <Col Name="Zoom / Rotate" Col="1" Page="0">
+      </Col>
+      <Col Name="Shear / Twirl" Col="2" Page="0">
+      </Col>
+      <Col Name="Output Options" Col="3" Page="0">
       </Col>
    </Page>
 </ShaderNodePreset>
