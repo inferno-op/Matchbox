@@ -11,12 +11,18 @@ uniform float scale;
 uniform vec2 shear_val;
 uniform float barrel;
 uniform float rotation;
+uniform float tilt_val;
+uniform float swivel_val;
+uniform float perspective;
 uniform int transform_order;
 uniform bool hardmatte;
 uniform int result;
 uniform bool input_premult;
 uniform bool comp_over_front;
 uniform bool repeat_texture;
+uniform vec3 rot3;
+uniform vec3 trans3;
+uniform vec2 fly;
 
 vec2 st = gl_FragCoord.xy / vec2( adsk_result_w, adsk_result_h);
 
@@ -41,6 +47,55 @@ vec2 barrel_distort(vec2 coords, vec2 center, float barrel, float multiplier)
     return coords;
 }
 
+vec2 swivel(vec2 coords, vec2 center, float swivel_val, float multiplier)
+{
+	float s = swivel_val * multiplier;
+	float fx = fly.x * multiplier;
+
+    mat3 m_mat = mat3(
+                	1.0 + abs(s*perspective) * 2.0,	0.0, 	fx,
+                	0.0,				1.0,	0.0, 
+                	s,    				0.0,	1.0
+                );
+                
+    coords -= center;
+
+    vec3 bla = vec3(coords, 1);
+
+    bla *= m_mat;
+
+    coords.x = bla.x/bla.z;
+    coords.y = bla.y/bla.z;
+
+    coords += center;
+
+    return coords;
+}
+
+vec2 tilt(vec2 coords, vec2 center, float tilt_val, float multiplier)
+{
+	float t = tilt_val * multiplier;
+	float fy = fly.y * multiplier;
+
+    mat3 m_mat = mat3(
+                	1.0, 0.0,					0.0,
+                	0.0, 1.0 + abs(t*perspective) * 2.0, 	fy,
+                	0.0, t,       				1.0
+                );
+
+    coords -= center;
+
+    vec3 bla = vec3(coords, 1); 
+
+    bla *= m_mat;
+
+    coords.x = bla.x/bla.z;
+    coords.y = bla.y/bla.z;
+
+    coords += center;
+
+    return coords;
+}
 
 vec2 shear(vec2 coords, vec2 center, vec2 shear, float multiplier)
 {
@@ -62,8 +117,7 @@ vec2 shear(vec2 coords, vec2 center, vec2 shear, float multiplier)
 
 vec2 uniform_scale(vec2 coords, vec2 center, float scale, float multiplier)
 {
-	scale = scale * multiplier + 100;
-    vec2 ss = vec2(scale / vec2(100.0));
+	vec2 ss = vec2(scale*multiplier + 1.0);
 
     return (coords - center) / ss + center;
 }
@@ -105,11 +159,13 @@ vec2 twirl(vec2 coords, vec2 center, float radius, float angle, float multiplier
 vec2 get_coords(float multiplier) {
 	vec2 coords = st;
 
-	coords = translate(coords, center, position, multiplier);
-	coords = uniform_scale(coords, center, scale, multiplier);
-	coords = barrel_distort(coords, center, barrel, multiplier);
+	coords = translate(coords, center, vec2(trans3.x, trans3.y), multiplier);
+	coords = tilt(coords, center, rot3.x, multiplier);
+	coords = swivel(coords, center, rot3.y, multiplier);
+	coords = rotate(coords, center, rot3.z, multiplier);
+	coords = uniform_scale(coords, center, trans3.z, multiplier);
 	coords = shear(coords, center, shear_val, multiplier);
-	coords = rotate(coords, center, rotation, multiplier);
+	coords = barrel_distort(coords, center, barrel, multiplier);
 	coords = twirl(coords, center, radius, angle, multiplier);
 
 	return coords;
