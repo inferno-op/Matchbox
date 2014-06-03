@@ -10,7 +10,6 @@ uniform vec2 picker2;
 uniform int result;
 uniform bool action_units;
 
-
 void main(void)
 {
 	vec2 rez = vec2( adsk_result_w, adsk_result_h);
