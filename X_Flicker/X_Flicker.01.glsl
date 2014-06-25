@@ -4,8 +4,8 @@ uniform float adsk_result_w, adsk_result_h;
 vec2 res = vec2(adsk_result_w, adsk_result_h);
 
 uniform sampler2D LockFrame, Front;
-
 uniform float lod;
+uniform int operation;
 
 #extension GL_ARB_shader_texture_lod : enable
 
@@ -23,6 +23,12 @@ void main(void)
 	float l = dot(lock_frame, lum);
 
 	float new_gain = l / a;
+
+	if (operation == 1) {
+		new_gain = a / l;
+		front = texture2D(LockFrame, st);
+	}
+
 	front *= new_gain;
 
 	gl_FragColor = vec4(front.rgb, new_gain);
