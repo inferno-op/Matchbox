@@ -18,6 +18,9 @@ miles@noesclavo.com" Name="X_Flicker">
       </Uniform>
       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="10.0" Inc="0.01" Tooltip="" Row="0" Col="0" Page="0" DisplayName="MipMap Level" Type="float" Name="lod">
       </Uniform>
+	<Uniform Row="1" Col="1" Page="0" Default="False" Tooltip="" DisplayName="Analyze Chroma" Type="bool" Name="match_chroma">
+      </Uniform>
+      
 	<Uniform Max="1000000" Min="-1000000" Default="0" Inc="1" Tooltip="" Row="0" Col="1" Page="0" DisplayName="Comp" Type="int" Name="operation" ValueType="Popup">
         <PopupEntry Title="Remove" Value="0">
             </PopupEntry>
