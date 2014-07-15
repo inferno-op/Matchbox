@@ -17,9 +17,10 @@ uniform int chroma_samples;
 
 vec2 uniform_scale(vec2 coords, float scale)
 {
+	vec2 st = gl_FragCoord.xy / vec2( adsk_result_w, adsk_result_h);
 	vec2 center = vec2(.5);
 
-    return (coords - center) / scale + center;
+    return (coords - center) / (scale) + center;
 }
 
 float sat( float t )

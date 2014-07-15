@@ -16,10 +16,18 @@ uniform float halo_width;
 uniform bool onlySampleCenter;
 uniform float color_mix;
 uniform float halo_brightness;
+uniform float noise_mix;
+
+float rand(vec2 co) {
+    float seed = 10.0;
+    return fract(sin(dot(co.xy, vec2(12.9898 + seed, 78.233 - seed)) + seed) * 43758.5453);
+}
+
 
 void main(void)
 {
 	vec2 st = gl_FragCoord.xy / vec2( adsk_result_w, adsk_result_h);
+	float noise = rand(st) * .7;
 
 	vec2 texcoord = -st + vec2(1.0);
  
@@ -37,10 +45,12 @@ void main(void)
 		 	weight = length(vec2(0.5) - offset) / length(vec2(0.5));
 		 	weight = pow(1.0 - weight, 10.0);
 		}
+
   
 		result += texture2D(adsk_results_pass4, offset) * weight;
    	}
 
+	result = mix(result, result*noise, noise_mix);
 	result = mix(result, result*rings, color_mix);
 
 	vec2 haloVec = normalize(ghost_vector) * halo_width;

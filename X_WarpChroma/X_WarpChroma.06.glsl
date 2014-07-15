@@ -3,6 +3,7 @@
 #version 120
 
 uniform float adsk_result_w, adsk_result_h;
+vec2 res = vec2(adsk_result_w, adsk_result_h);
 uniform sampler2D adsk_results_pass1, adsk_results_pass2, adsk_results_pass4, adsk_results_pass5;
 uniform float adsk_result_frameratio;
 uniform int samples;
@@ -14,6 +15,7 @@ uniform float rotation;
 uniform float barrel;
 uniform float radius;
 uniform float angle;
+uniform float fisheye;
 uniform bool premult_input;
 uniform bool comp_over_front;
 uniform bool repeat_texture;
@@ -21,10 +23,42 @@ uniform bool comp_over_back;
 uniform int result;
 
 
+const float PI = 3.1415926535;
+
+#define EPSILON 0.000011
+
+
 bool isInTex( const vec2 coords )
 {
         return coords.x >= 0.0 && coords.x <= 1.0 &&
                     coords.y >= 0.0 && coords.y <= 1.0;
+}
+
+vec2 fisheye_distort(vec2 coords, vec2 center, float fisheye, float multiplier)
+{
+	float curvature = abs(10.0);
+    float extent = fisheye;
+    float optics = extent / log2(curvature * extent + 1.0) / 1.4427;
+    vec2 PP = coords - vec2 (.5);
+    float P0 = PP[0];
+    float P1 = PP[1];
+    float radius = sqrt(P0 * P0 + P1 * P1);
+
+    float cosangle = P0 / radius;
+    float sinangle = P1 / radius;
+
+    float rad1, rad2, newradius;
+    rad1 = (exp2((radius / optics) * 1.4427) - 1.0) / curvature;
+    rad2 = optics * log2(1.0 + curvature * radius) / 1.4427;
+    newradius = 10.0 > 0.0 ? rad1 : rad2;
+
+    vec2 FE = vec2 (0.0);
+    FE[0] = newradius * cosangle + 0.5;
+    FE[1] = newradius * sinangle + 0.5;
+    FE = radius <= extent ? FE : coords;
+    FE = curvature < EPSILON ? coords : FE;
+
+	return vec2(FE);
 }
 
 vec2 twirl(vec2 coords, vec2 center, float radius, float angle, float multiplier)
@@ -77,7 +111,7 @@ vec2 barrel_distort(vec2 coords, vec2 center, float barrel, float multiplier)
 
 vec2 translate(vec2 coords, vec2 center, vec2 position, float multiplier)
 {
-    position = position * vec2(multiplier);
+    position = position / res * vec2(multiplier);
     return coords - position;
 
 }
@@ -93,8 +127,10 @@ vec2 uniform_scale(vec2 coords, vec2 center, float scale, float multiplier)
 
 vec2 rotate(vec2 coords, vec2 center, float rotation, float multiplier)
 {
-    rotation *= multiplier;
-    mat2 rotationMatrice = mat2( cos(-rotation), -sin(-rotation), sin(-rotation), cos(-rotation) );
+	//float rot = rotation / 9.42477796077;
+	float rot = rotation * 0.02617993877;
+    rot *= multiplier;
+    mat2 rotationMatrice = mat2( cos(-rot), -sin(-rot), sin(-rot), cos(-rot) );
 
     coords -= center;
     coords.x *= adsk_result_frameratio;
@@ -111,6 +147,7 @@ vec2 warp(vec2 coords, vec2 center, float t, float multiplier)
 	coords = uniform_scale(coords, center, scale * t, multiplier);
 	coords = shear(coords, center, -shear_val * t, multiplier);
 	coords = barrel_distort(coords, center, -barrel * t, multiplier);
+	//coords = fisheye_distort(coords, center, -fisheye * t, multiplier);
 	coords = rotate(coords, center, -rotation * t, multiplier);
 	coords = twirl(coords, center, radius * t, angle * t, multiplier);
 
@@ -185,11 +222,11 @@ void main()
 
 	if (result == 1) {
 		vec4 front = texture2D(adsk_results_pass1, st);
-		comp = warped * warped.a + front * (1.0 - warped.a);
+		comp = warped + front * (1.0 - warped.a);
 		comp.a = warped.a;
 	} else if (result == 2) {
 		vec4 back = texture2D(adsk_results_pass2, st);
-		comp = warped * warped.a + back * (1.0 - warped.a);
+		comp = warped + back * (1.0 - warped.a);
 		comp.a = warped.a;
 	}
 
