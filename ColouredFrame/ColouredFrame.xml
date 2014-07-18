@@ -134,7 +134,7 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="color fra
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0">
          </SubUniform>
       </Uniform>
-	 <Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Pallette" Type="bool" Name="show_cbpallette"
+	 <Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Palette" Type="bool" Name="show_cbpallette"
 	  		UIConditionSource="process" UIConditionValue="2" UIConditionInvert="False" UIConditionType="Hide">
       </Uniform>
       <Uniform Inc="0.01" Tooltip="" Row="1" Col="1" Page="0" DisplayName="Color 2" IconType="Pick" ValueType="Colour" Type="vec3" Name="cb_color2"
@@ -263,7 +263,7 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="color fra
          </SubUniform>
       </Uniform>
 
-		<Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Pallette" Type="bool" Name="show_pallette"
+		<Uniform Row="0" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Palette" Type="bool" Name="show_pallette"
 	 		UIConditionSource="process" UIConditionValue="0" UIConditionInvert="False" UIConditionType="Hide">
       	</Uniform>
 
@@ -271,7 +271,7 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="color fra
 	 		UIConditionSource="process" UIConditionValue="3" UIConditionInvert="False" UIConditionType="Hide">
       </Uniform>
 
-		<Uniform Row="2" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Pallette" Type="bool" Name="show_gpallette"
+		<Uniform Row="2" Col="2" Page="0" Default="False" Tooltip="" DisplayName="Palette" Type="bool" Name="show_gpallette"
 	 		UIConditionSource="process" UIConditionValue="5" UIConditionInvert="False" UIConditionType="Hide">
       </Uniform>
       <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.95" Inc="0.01" Tooltip="" Row="0" Col="1" Page="0" DisplayName="Size" Type="float" Name="cw_size"
