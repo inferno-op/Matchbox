@@ -3,6 +3,8 @@
 
 uniform float adsk_time, adsk_result_w, adsk_result_h, adsk_result_frameratio;
 vec2 res = vec2(adsk_result_w, adsk_result_h);
+float time = adsk_time *.05;
+
 
 uniform sampler2D adsk_results_pass1, adsk_results_pass2, adsk_results_pass3, adsk_results_pass4, adsk_results_pass5;
 
@@ -22,6 +24,9 @@ uniform vec3 color;
 
 uniform bool static_noise;
 uniform bool color_noise;
+uniform float cells;
+
+
 
 uniform vec3 cb_color1, cb_color2;
 uniform float checkerboard_freq;
@@ -54,6 +59,13 @@ uniform float shape_aspect;
 uniform bool ssat;
 uniform bool slum;
 uniform bool shue;
+
+// start grid
+uniform float g_sizeProp, g_lineProp, g_rotation, g_line;
+uniform bool g_propwidth, g_propgridsize;
+uniform vec2 g_size;
+uniform vec3 g_gridcolor, g_backcolor;
+//end grid
 
 vec2 texel = vec2(1.0) / res;
 
@@ -162,28 +174,10 @@ float luminance(vec3 col) {
 	return clamp(dot(col, lum_c), 0.0, 1.0);
 }
 
-float random(vec2 co)
-{
-	float seed = adsk_time;
-
-	if (static_noise) {
-		seed = 1.0;
+float rand2(vec2 co)
+	{
+		return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
 	}
-
-	float a = 38.544846;
-	float b = 321.468884635;
-	float c = 48348.65468456;
-	float dot= dot(co.xy * seed ,vec2(a,b));
-	float sn= mod(dot,3.14);
-
-	return fract(sin(sn) * c);
-}
-
-float noise(vec2 st) 
-{
-	vec2 p = scale(st, zoom / 100 * res.x, 1.0);
-	return random(floor(p));
-}
 
 vec3 checkerboard(vec2 st, vec3 first, vec3 second)
 {
@@ -485,12 +479,26 @@ void main(void)
 				}
 			}
 		}
-	} else if (process == 1) {
-		col = vec3(noise(st));
-		matte_out = col.r;
-		if ( color_noise ) {
-            col = vec3(noise(st * noise(st)+1.), noise(st * noise(st)-1.), noise(st));
+	} else if (process == 1)
+	{
+		vec2 c = (cells/100.*res.x)*vec2(1.,res.y/res.x);
+
+		if ( static_noise )
+		{
+			time = 1.0;
 		}
+					
+		float r = rand2(vec2((2.+time) * floor(st.x*c.x)/c.x, (2.+time) * floor(st.y*c.y)/c.y ));
+		float g = rand2(vec2((5.+time) * floor(st.x*c.x)/c.x, (5.+time) * floor(st.y*c.y)/c.y ));
+		float b = rand2(vec2((9.+time) * floor(st.x*c.x)/c.x, (9.+time) * floor(st.y*c.y)/c.y ));
+
+		col = vec3(r,r,r);
+
+		if (color_noise )
+		{
+			col = vec3(r,g,b);
+		}
+		
 	} else if (process == 2) {
 		col = checkerboard(st, cb_color1, cb_color2);
 		matte_out = checkerboard(st, white, black).r;
@@ -518,6 +526,7 @@ void main(void)
 	} else if (process == 3) {
 		col = colorbars(st);
 		float matte_out = luminance(col);
+	
 	} else if (process == 4) {
 		col = colorwheel(st);
 		matte_out = draw_circle(st, cw_center, cw_size * .25, cw_aspect);
@@ -548,7 +557,37 @@ void main(void)
 		float matte_out = luminance(col);
 	} else if (process == 6) {
 		col = shape(st).rgb;
+	} else if (process == 7) {
+	
+	// added grid 
+		
+   
+		mat2 rotationMatrice = mat2( cos(-g_rotation), -sin(-g_rotation), sin(-g_rotation), cos(-g_rotation) );
+		vec2 position = st;
+		position -= vec2(0.5, 0.5);
+		position.x *= adsk_result_frameratio;
+		position *= rotationMatrice;
+		position.x /= adsk_result_frameratio;
+		position += vec2(0.5, 0.5);
+	
+		if(mod(position.x, g_size.x / 10.0) <= g_line / adsk_result_w)
+		{
+			col = g_gridcolor;
+		}
+		else if(mod(position.y, g_size.y / 10.0) <= g_line / adsk_result_h)
+		{
+			col = g_gridcolor;
+		}
+		else
+		{
+			col = g_backcolor;
+		}
+				matte_out = col.r;
 	}
+		
+		
+		
+	
 
 	if (result == 2) {
 		float matte = texture2D(adsk_results_pass3, st).r;
