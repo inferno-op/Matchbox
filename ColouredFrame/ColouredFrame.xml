@@ -1,7 +1,7 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
 This Matchbox shader creates Colors, Noise, Checkerboards, Colorbars, Colorwheels, Gradients and Shapesto get you started.
 
-Version: 1.1
+Version: 1.2
 
 Input:
 
@@ -29,7 +29,7 @@ Type:
 	Noise:
 		- Color: switch colored noise on/off
 		- Static: switch static frame on/off
-		- Size: zoom in/out of the noise
+		- Resolution: zoom in/out of the noise
 
 	Checkerboard:
 		- Color1: 1st color of the checkerboard
@@ -68,6 +68,7 @@ Type:
 	Grid:
 		- Color1: grid color 
 		- Color2: bg color
+		- Invert: invert color selection
 		- Size: adjust grid size
 		- Width: adjust grid width
 		- Rotation: rotates the grid
@@ -361,6 +362,10 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="ColouredF
     	<Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="3" Col="2" Page="0" DisplayName="Rotation" Type="float" Name="g_rotation" 
 			UIConditionSource="process" UIConditionValue="7" UIConditionInvert="False" UIConditionType="Hide">
     	</Uniform>
+
+        <Uniform Row="2" Col="1" Page="0" Default="False" Tooltip="" DisplayName="Invert" Type="bool" Name="g_invert"
+			UIConditionSource="process" UIConditionValue="7" UIConditionInvert="False" UIConditionType="Hide">
+        </Uniform>
 	
     	<Uniform ResDependent="None" Max="100.0" Min="0.0001" Default="100.0" Inc="0.1" Tooltip="" Row="2" Col="1" Page="0" DisplayName="Resolution" Type="float" Name="cells"
 			UIConditionSource="process" UIConditionValue="1" UIConditionInvert="False" UIConditionType="Hide">

@@ -64,7 +64,7 @@ uniform float shape_aspect;
 
 // start grid
 uniform float g_sizeProp, g_lineProp, g_rotation, g_line;
-uniform bool g_propwidth, g_propgridsize;
+uniform bool g_propwidth, g_propgridsize, g_invert;
 uniform vec2 g_size;
 uniform vec3 g_gridcolor, g_backcolor;
 //end grid
@@ -493,18 +493,27 @@ vec3 grid(vec2 position)
    	position *= rotationMatrice;
    	position.x /= adsk_result_frameratio;
    	position += vec2(0.5, 0.5);
-   
+   	vec3 color1 = g_gridcolor;
+	vec3 color2 = g_backcolor;
+	
+	if ( g_invert )
+	{
+		vec3 colorTemp;
+		colorTemp = g_gridcolor;
+		color1 = g_backcolor;
+		color2 = colorTemp;
+	}
    	if(mod(position.x, g_size.x / 10.0) <= g_line / adsk_result_w)
    	{
-            col = g_gridcolor;
+            col = color1;
    	}
    	else if(mod(position.y, g_size.y / 10.0) <= g_line / adsk_result_h)
    	{
-            col = g_gridcolor;
+            col = color1;
    	}
    	else
    	{
-            col = g_backcolor;
+            col = color2;
    	}
 
 	return col;
