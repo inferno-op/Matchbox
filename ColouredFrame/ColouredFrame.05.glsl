@@ -4,12 +4,6 @@ uniform float adsk_time, adsk_result_w, adsk_result_h, adsk_result_frameratio;
 vec2 res = vec2(adsk_result_w, adsk_result_h);
 
 
-vec2 pallette_center = vec2(0.5);
-float pallette_size = .5;
-float pallette_val = 1.0;
-float pallette_aspect = 0.0;
-
-
 vec3 rgb2hsv(vec3 c)
 {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -28,15 +22,7 @@ vec3 hsv2rgb(vec3 c)
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-vec2 scale(vec2 st, float scale_amnt, float aspect) {
-    st -= vec2(.5);
-    st = 2.0 * (st * scale_amnt);
-    st.x *= aspect * adsk_result_frameratio;
-
-    return st;
-}
-
-vec3 make_pallette(vec2 st)
+vec3 make_palette(vec2 st)
 {
 	vec3 col = vec3(0.0);
 	float v;
@@ -64,7 +50,7 @@ vec3 make_pallette(vec2 st)
 void main(void)
 {
 	vec2 st = gl_FragCoord.xy / vec2( adsk_result_w, adsk_result_h);
-	vec3 col = make_pallette(st);
+	vec3 col = make_palette(st);
 
 
 	gl_FragColor = vec4(col, 1.0);

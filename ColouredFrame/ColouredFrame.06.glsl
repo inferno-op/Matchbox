@@ -5,60 +5,62 @@ uniform float adsk_time, adsk_result_w, adsk_result_h, adsk_result_frameratio;
 vec2 res = vec2(adsk_result_w, adsk_result_h);
 float time = adsk_time *.05;
 
-
 uniform sampler2D adsk_results_pass1, adsk_results_pass2, adsk_results_pass3, adsk_results_pass4, adsk_results_pass5;
 
+// Global Uniforms
 uniform int process;
 uniform int result;
+uniform bool ssat;
+uniform bool slum;
+uniform bool shue;
 
-uniform float zoom;
-
+//Color Uniforms
 uniform bool show_swatch;
 uniform vec2 swatch_center;
 uniform float swatch_size;
-
-uniform bool show_pallette;
-uniform float pallette_detail;
-
+uniform bool show_palette;
+uniform float palette_detail;
 uniform vec3 color;
 
+//Noise Uniforms
 uniform bool static_noise;
 uniform bool color_noise;
+uniform float zoom;
 uniform float cells;
 
-
-
+//Checkerboard Uniforms
 uniform vec3 cb_color1, cb_color2;
 uniform float checkerboard_freq;
 uniform float cb_aspect;
-uniform bool show_cbpallette;
-uniform float cbpallette_detail;
+uniform bool show_cbpalette;
+uniform float cbpalette_detail;
 
+//Colorbars Uniforms
 uniform int colorbars_type;
 uniform int colorbars_p;
 uniform int colorbars_softness;
 uniform bool blue_only;
 
+//Colorwheel Uniforms
 uniform vec2 cw_center;
 uniform float cw_size;
 uniform float cw_val;
 uniform float cw_aspect;
 
+//Grad Uniforms
 uniform int grad_type;
 uniform int grad_fit;
-uniform bool show_gpallette;
-uniform float gpallette_detail;
+uniform bool show_gpalette;
+uniform float gpalette_detail;
 uniform vec3 grad_color1;
 uniform vec3 grad_color2;
 uniform bool grad_rev;
 
+//Shape Uniforms
 uniform float shape_size;
 uniform int shape_type;
 uniform float shape_aspect;
 
-uniform bool ssat;
-uniform bool slum;
-uniform bool shue;
 
 // start grid
 uniform float g_sizeProp, g_lineProp, g_rotation, g_line;
@@ -68,8 +70,6 @@ uniform vec3 g_gridcolor, g_backcolor;
 //end grid
 
 vec2 texel = vec2(1.0) / res;
-
-
 const vec3 lum_c = vec3(0.2125, 0.7154, 0.0721);
 
 const vec3 white = vec3(1.0);
@@ -87,6 +87,19 @@ bool isInTex( const vec2 coords )
           coords.y >= 0.0 && coords.y <= 1.0;
 }
 
+//CIRCLE
+float draw_circle(vec2 st, vec2 center, float size, float aspect)
+{
+	vec2 v2 = center - (center + vec2(size));
+	v2.x *= adsk_result_frameratio;
+	vec2 v3 = center - st;
+	v3.x *= adsk_result_frameratio;
+	v3.x /= aspect;
+
+    float circle =  1.0 - smoothstep(length(v2) - .005, length(v2), length(v3));
+
+    return circle;
+}
 
 vec3 rgb2hsv(vec3 c)
 {
@@ -106,6 +119,30 @@ vec3 hsv2rgb(vec3 c)
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+//PALETTE
+vec4 make_palette(vec2 st)
+{
+	vec2 coords = (st - vec2(.5)) / .65 + .5;
+
+	vec4 palette;
+   	if (isInTex(coords)) {
+    	palette = texture2DLod(adsk_results_pass5, coords , palette_detail);
+
+
+   		if (st.x < .2) {
+       		palette.rgb -= .5;
+       		palette = clamp(palette, 0.0, 1.0);
+  		}
+
+   		float thresh = .93;
+   		if (palette.r > thresh && palette.g > thresh && palette.b > thresh) {
+      		palette.rgb = white;
+  		}
+	}
+
+	return palette;
+}
+
 
 float mag(vec2 v) {
     // find the magnitude of a vector
@@ -119,19 +156,7 @@ float get_angle(vec2 center_to_point2, vec2 coords_from_center)
     return angle;
 }
 
-float draw_circle(vec2 st, vec2 center, float size, float aspect)
-{
-	vec2 v2 = center - (center + vec2(size));
-	v2.x *= adsk_result_frameratio;
-	vec2 v3 = center - st;
-	v3.x *= adsk_result_frameratio;
-	v3.x /= aspect;
-
-    float circle =  1.0 - smoothstep(length(v2) - .005, length(v2), length(v3));
-
-    return circle;
-}
-
+//COLORWHEEL
 vec3 colorwheel(vec2 st) {
 	vec2 v2 = cw_center - vec2(cw_center.x - .01, cw_center.y);
 	v2.x *= adsk_result_frameratio;
@@ -162,10 +187,36 @@ vec3 colorwheel(vec2 st) {
 	return hsv2rgb(col) * vec3(circle);
 }
 
+//OVERLAYS
+vec3 make_overlays(vec2 st, vec3 front, bool show_p, bool show_s)
+{
+	vec4 palette = vec4(0.0);
+	float swatch = 0.0;
+	vec3 col;
+
+	if (result == 0) {
+       	col = front;
+       	if (show_p) {
+         	palette = make_palette(st);
+       	}
+
+       	if (show_s) {
+         	swatch = draw_circle(st, swatch_center, swatch_size * .25, 1.0);
+     	}
+
+       	col = mix(col, palette.rgb, palette.a);
+       	col = mix(col, vec3(color), swatch);
+  	}
+
+	return col;
+}
+
+//SCALE
 vec2 scale(vec2 st, float scale_amnt, float aspect) {
 	st -= vec2(.5);
-	st = 2.0 * (st * scale_amnt);
 	st.x *= aspect * adsk_result_frameratio;
+	st /= scale_amnt;
+	st += vec2(.5);
 
 	return st;
 }
@@ -174,17 +225,43 @@ float luminance(vec3 col) {
 	return clamp(dot(col, lum_c), 0.0, 1.0);
 }
 
-float rand2(vec2 co)
-	{
-		return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
+//NOISE
+float rand2(vec2 co) 
+{
+	return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+vec3 noise(vec2 st) {
+	vec2 c = (cells/100.*res.x)*vec2(1.,res.y/res.x);
+	vec3 col = vec3(0.0);
+
+    if ( static_noise )
+    {
+     	time = 1.0;
 	}
 
+   	float r = rand2(vec2((2.+time) * floor(st.x*c.x)/c.x, (2.+time) * floor(st.y*c.y)/c.y ));
+   	float g = rand2(vec2((5.+time) * floor(st.x*c.x)/c.x, (5.+time) * floor(st.y*c.y)/c.y ));
+   	float b = rand2(vec2((9.+time) * floor(st.x*c.x)/c.x, (9.+time) * floor(st.y*c.y)/c.y ));
+
+   	col = vec3(r,r,r);
+
+   	if (color_noise )
+   	{
+   		col = vec3(r,g,b);
+   	}
+
+	return col;
+}
+
+//CHECKERBOARD
 vec3 checkerboard(vec2 st, vec3 first, vec3 second)
 {
-	vec2 p = scale(st, checkerboard_freq * .25, cb_aspect);
+	vec2 p = scale(st, checkerboard_freq * .1, cb_aspect);
 	return mix(first, second, max(0.0, sign(sin(p.x)) * sign(sin(p.y))));
 }
 
+//SMPTE2
 vec3 smpte2_colorbars(vec2 st)
 {
 	vec3 col = black;
@@ -209,6 +286,8 @@ vec3 smpte2_colorbars(vec2 st)
 
 	return col;
 }
+
+//SMPTE
 vec3 smpte_colorbars(vec2 st)
 {
 	vec3 col = black;
@@ -255,6 +334,7 @@ vec3 smpte_colorbars(vec2 st)
 	return col;
 }
 
+//PAL
 vec3 pal_colorbars(vec2 st)
 {
 	vec3 col = black;
@@ -315,6 +395,7 @@ vec3 pal_colorbars(vec2 st)
 	return col;
 }
 
+//COLORBARS
 vec3 colorbars(vec2 st) 
 {
 	vec3 bars;
@@ -336,27 +417,7 @@ vec3 colorbars(vec2 st)
 	return bars;
 }
 
-float is_perpendicular(vec2 point_from_center, vec2 coords_from_center)
-{
-    float scale_vector = 1000.0;
-    float width = 10.0;
-
-    float dot1 = 1.0 - abs(dot(normalize(point_from_center) / width, coords_from_center * scale_vector));
-
-    return dot1;
-}
-
-
-float is_parallel(vec3 point_from_center, vec3 coords_from_center)
-{
-    float scale_vector = 1000.0;
-
-    float para = 1.0 - abs(cross(normalize(point_from_center) / 1, coords_from_center * scale_vector).z);
-
-    return para;
-}
-
-
+//GRAD
 vec4 gradient(vec2 st) {
 	vec3 col = vec3(st.x);
 
@@ -393,6 +454,7 @@ vec4 gradient(vec2 st) {
 	return vec4(col, a);
 }
 
+//SQUARE
 float draw_square(vec2 st) {
 	float size = shape_size;
 	vec2 center = vec2(.5);
@@ -412,6 +474,7 @@ float draw_square(vec2 st) {
 	}
 }
 
+//SHAPE
 vec4 shape(vec2 st) {
 	if (shape_type == 0) {
 		return vec4(draw_square(st));
@@ -420,6 +483,32 @@ vec4 shape(vec2 st) {
 	}
 }
 
+//GRID
+vec3 grid(vec2 position)
+{
+	vec3 col = vec3(0.0);
+	mat2 rotationMatrice = mat2( cos(-g_rotation), -sin(-g_rotation), sin(-g_rotation), cos(-g_rotation) );
+   	position -= vec2(0.5, 0.5);
+   	position.x *= adsk_result_frameratio;
+   	position *= rotationMatrice;
+   	position.x /= adsk_result_frameratio;
+   	position += vec2(0.5, 0.5);
+   
+   	if(mod(position.x, g_size.x / 10.0) <= g_line / adsk_result_w)
+   	{
+            col = g_gridcolor;
+   	}
+   	else if(mod(position.y, g_size.y / 10.0) <= g_line / adsk_result_h)
+   	{
+            col = g_gridcolor;
+   	}
+   	else
+   	{
+            col = g_backcolor;
+   	}
+
+	return col;
+}
 
 void main(void)
 {
@@ -430,103 +519,28 @@ void main(void)
 	vec3 col = vec3(color);
 	float matte_out = luminance(col);
 
-	vec4 pallette = vec4(0.0);
-	float swatch = draw_circle(st, swatch_center, swatch_size * .25, 1.0);
-
-	bool sw = show_swatch;
-	bool sp = show_pallette;
-	bool gsp = show_gpallette;
-	bool csp = show_cbpallette;
-
-	if (result != 0) {
-		sw = false;
-		sp = false;
-		gsp = false;
-		csp = false;
-	}
-
 	if (process == 0) {
-		if (sw) {
-			col = mix(front, color, swatch);
-		}
 
-		if (sp) {
-			vec2 coords = (st - vec2(.5)) / .65 + .5;
-			if (isInTex(coords)) {
-				pallette = texture2DLod(adsk_results_pass5, coords , pallette_detail);
-			
+		/* 
+		make_overlays will create the palette and the swatch depending on the arguments.
+		The first argument is the uvs, the second is what you want under the overlays.
+		In the case of the color mode I want it over the front input. But other modes probably
+		it would go over whatever was being generated. The last 2 arguments are uniform bools
+		wether or not to show the palette and the swatch. Each mode needs to have its own
+		unique bools
+		*/
 
-				col = mix(front, pallette.rgb, pallette.a);
-
-				if (sw) {
-					col = mix(col, color, swatch);
-				}	
-
-				if (st.x < .2) {
-					col.rgb -= .5;
-					col = clamp(col, 0.0, 1.0);
-				}
-
-				float thresh = .93;
-				if (col.r > thresh && col.g > thresh && col.b > thresh) {
-					col.rgb = white;
-				}
-			} else {
-				if (sw) {
-					col = mix(front, color, swatch);
-				} else {	
-					col = front;
-				}
-			}
-		}
-	} else if (process == 1)
-	{
-		vec2 c = (cells/100.*res.x)*vec2(1.,res.y/res.x);
-
-		if ( static_noise )
-		{
-			time = 1.0;
-		}
-					
-		float r = rand2(vec2((2.+time) * floor(st.x*c.x)/c.x, (2.+time) * floor(st.y*c.y)/c.y ));
-		float g = rand2(vec2((5.+time) * floor(st.x*c.x)/c.x, (5.+time) * floor(st.y*c.y)/c.y ));
-		float b = rand2(vec2((9.+time) * floor(st.x*c.x)/c.x, (9.+time) * floor(st.y*c.y)/c.y ));
-
-		col = vec3(r,r,r);
-
-		if (color_noise )
-		{
-			col = vec3(r,g,b);
-		}
-		
+		col = make_overlays(st, front, show_palette, show_swatch);
+	} else if (process == 1) {
+		col = noise(st);
+		matte_out = luminance(col);
 	} else if (process == 2) {
 		col = checkerboard(st, cb_color1, cb_color2);
 		matte_out = checkerboard(st, white, black).r;
-
-		if (csp) {
-            vec2 coords = (st - vec2(.5)) / .65 + .5;
-            if (isInTex(coords)) {
-                pallette = texture2DLod(adsk_results_pass5, coords , cbpallette_detail);
-
-
-                col = mix(col, pallette.rgb, pallette.a);
-
-                if (st.x < .2) {
-                    col.rgb -= .5;
-                    col = clamp(col, 0.0, 1.0);
-                }
-
-                float thresh = .93;
-                if (col.r > thresh && col.g > thresh && col.b > thresh) {
-                    col.rgb = white;
-                }
-            }
-        }
-
+		col = make_overlays(st, col, show_cbpalette, false);
 	} else if (process == 3) {
 		col = colorbars(st);
-		float matte_out = luminance(col);
-	
+		matte_out = luminance(col);
 	} else if (process == 4) {
 		col = colorwheel(st);
 		matte_out = draw_circle(st, cw_center, cw_size * .25, cw_aspect);
@@ -534,60 +548,14 @@ void main(void)
 		vec4 tmp = gradient(st);
 		col.rgb = tmp.rgb;
 		matte_out = tmp.a;
-
-		if (gsp) {
-            vec2 coords = (st - vec2(.5)) / .65 + .5;
-            if (isInTex(coords)) {
-                pallette = texture2DLod(adsk_results_pass5, coords , gpallette_detail);
-
-
-                col = mix(col, pallette.rgb, pallette.a);
-
-                if (st.x < .2) {
-                    col.rgb -= .5; 
-                    col = clamp(col, 0.0, 1.0);
-                }   
-
-                float thresh = .93;
-                if (col.r > thresh && col.g > thresh && col.b > thresh) {
-                    col.rgb = white;
-                }   
-            }   
-        }   
-		float matte_out = luminance(col);
+		matte_out = luminance(col);
+		col = make_overlays(st, col, show_gpalette, false);
 	} else if (process == 6) {
 		col = shape(st).rgb;
 	} else if (process == 7) {
-	
-	// added grid 
-		
-   
-		mat2 rotationMatrice = mat2( cos(-g_rotation), -sin(-g_rotation), sin(-g_rotation), cos(-g_rotation) );
-		vec2 position = st;
-		position -= vec2(0.5, 0.5);
-		position.x *= adsk_result_frameratio;
-		position *= rotationMatrice;
-		position.x /= adsk_result_frameratio;
-		position += vec2(0.5, 0.5);
-	
-		if(mod(position.x, g_size.x / 10.0) <= g_line / adsk_result_w)
-		{
-			col = g_gridcolor;
-		}
-		else if(mod(position.y, g_size.y / 10.0) <= g_line / adsk_result_h)
-		{
-			col = g_gridcolor;
-		}
-		else
-		{
-			col = g_backcolor;
-		}
-				matte_out = col.r;
+		col = grid(st);
+		matte_out = col.r;
 	}
-		
-		
-		
-	
 
 	if (result == 2) {
 		float matte = texture2D(adsk_results_pass3, st).r;
