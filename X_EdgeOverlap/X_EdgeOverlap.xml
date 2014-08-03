@@ -1,4 +1,6 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
+Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
+
 2015 Only
 Blur a little bit of of the foreground into the background
 and Blur a little bit of the background into the foreground
