@@ -1,11 +1,14 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
-Blur with mask, strength, comp over front, back or black.
+Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
 
-miles@noesclavo.com
+2015 Only
+Blur with mask, strength, comp over front, back or black.
 
 Bluring part of this shader by lewis@lewissaunders.com
 
-This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License." Name="Blurs">
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+
+miles@noesclavo.com" Name="Blurs">
   	<Shader OutputBitDepth="Output" Index="1">
       	<Uniform Index="0" NoInput="Error" Tooltip="" DisplayName="Front" InputType="Front" Mipmaps="False" GL_TEXTURE_WRAP_T="GL_REPEAT" GL_TEXTURE_WRAP_S="GL_REPEAT" GL_TEXTURE_MAG_FILTER="GL_LINEAR" GL_TEXTURE_MIN_FILTER="GL_LINEAR" Type="sampler2D" Name="Front">
       	</Uniform>

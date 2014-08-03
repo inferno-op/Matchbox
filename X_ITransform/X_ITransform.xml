@@ -1,4 +1,7 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1.02" Description="
+Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
+
+2015 Only
 Warp Transformation with comp modes. Can Use a strength (Gray scale input) to effect the strength of the transformations, Similiar 
 to the I* nodes in Shake. Handy stuff.
 

@@ -1,7 +1,11 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
+Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
+
+2015 Only
 Idea from here: /http://john-chapman-graphics.blogspot.com/2013/02/pseudo-lens-flare.html
 Loops from here http://glsl.heroku.com/e#12897.0
 
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
 miles@noesclavo.com" Name="X Glare Flare">
    <Shader OutputBitDepth="Output" Index="1">

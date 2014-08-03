@@ -1,4 +1,12 @@
-<ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="Make Shapes - miles@noesclavo.com" Name="Shape Grid">
+<ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
+Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
+
+2015 Only
+Make Shapes
+
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+
+miles@noesclavo.com" Name="Shape Grid">
    <Shader OutputBitDepth="Output" Index="4">
 		<Uniform Inc="0.01" Tooltip="" Row="3" Col="0" Page="0" DisplayName="Color 1" IconType="Pick" ValueType="Colour" Type="vec3" Name="color2">
          <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default=".281">
