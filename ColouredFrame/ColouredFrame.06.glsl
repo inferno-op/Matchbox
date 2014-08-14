@@ -1,6 +1,8 @@
 #version 120
 #extension GL_ARB_shader_texture_lod : enable
 
+vec2 center = vec2(.5);
+
 uniform float adsk_time, adsk_result_w, adsk_result_h, adsk_result_frameratio;
 vec2 res = vec2(adsk_result_w, adsk_result_h);
 float time = adsk_time *.05;
@@ -56,10 +58,19 @@ uniform vec3 grad_color1;
 uniform vec3 grad_color2;
 uniform bool grad_rev;
 
-//Shape Uniforms
-uniform float shape_size;
-uniform int shape_type;
+//Shape
+float softness = 0.0;
+
+uniform int sides;
+uniform int num_shapes;
 uniform float shape_aspect;
+uniform float shape_size;
+uniform vec2 shape_offset;
+uniform float shape_rotation;
+uniform vec3 shape_color1;
+uniform vec3 shape_color2;
+uniform bool clamp_shape;
+
 
 
 // start grid
@@ -68,6 +79,7 @@ uniform bool g_propwidth, g_propgridsize, g_invert;
 uniform vec2 g_size;
 uniform vec3 g_gridcolor, g_backcolor;
 //end grid
+
 
 vec2 texel = vec2(1.0) / res;
 const vec3 lum_c = vec3(0.2125, 0.7154, 0.0721);
@@ -454,34 +466,6 @@ vec4 gradient(vec2 st) {
 	return vec4(col, a);
 }
 
-//SQUARE
-float draw_square(vec2 st) {
-	float size = shape_size;
-	vec2 center = vec2(.5);
-
-	st -= center;
-	st.x *= adsk_result_frameratio;
-	st += center;
-
-	if (st.x > center.x - size * .5 * shape_aspect  && st.x < center.x + size * shape_aspect * .5) {
-		if (st.y > center.y - size * .5  && st.y < center.y + size * .5) {
-			return 1.0;
-		} else {
-			return 0.0;
-		}
-	} else {
-		return 0.0;
-	}
-}
-
-//SHAPE
-vec4 shape(vec2 st) {
-	if (shape_type == 0) {
-		return vec4(draw_square(st));
-	} else if (shape_type == 1) {
-		return vec4(draw_circle(st, vec2(.5), shape_size * .25, shape_aspect));
-	}
-}
 
 //GRID
 vec3 grid(vec2 position)
@@ -518,6 +502,172 @@ vec3 grid(vec2 position)
 
 	return col;
 }
+
+mat2 get_matrix(float angle)
+{
+
+    float r = radians(angle);
+
+    mat2 rotationMatrice = mat2(
+                                 cos(r),
+                                -sin(r),
+                                 sin(r),
+                                 cos(r)
+                            );
+
+
+    return rotationMatrice;
+}
+
+vec2 bary(vec2 pos, vec2 top, vec2 left,vec2  right)
+{
+
+    top -= center;
+    top.x *= shape_aspect;
+    top += center;
+    left -= center;
+    left.x *= shape_aspect;
+    left += center;
+    right -= center;
+    right.x *= shape_aspect;
+    right += center;
+
+    top += shape_offset;
+    left += shape_offset;
+    right += shape_offset;
+
+    vec2 v0 = top - left;
+    vec2 v1 = right - left;
+    vec2 v2 = pos - left;
+
+    float dot00 = dot(v0, v0);
+    float dot01 = dot(v0, v1);
+    float dot02 = dot(v0, v2);
+    float dot11 = dot(v1, v1);
+    float dot12 = dot(v1, v2);
+
+    float invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    return vec2(u,v);
+}
+
+vec2 rotate_shape(vec2 st, vec2 shape_p, float rot)
+{
+    shape_p -= center;
+    shape_p.x *= adsk_result_frameratio;
+    shape_p *= get_matrix(rot);
+    shape_p.x /= adsk_result_frameratio;
+    shape_p += center;
+
+    return shape_p;
+}
+
+float draw_shape(vec2 st, vec2 top)
+{
+    float col = 0.0;
+
+    //vec2 top = vec2(.5, .5 + shape_size * .5);
+
+    //Works from here
+   
+    vec2 shape[60];
+
+    shape[0] = top;
+    shape[0] -= center;
+    shape[0].x *= adsk_result_frameratio;
+
+    float a;
+
+    for (int i = 1; i <= sides; i++) {
+        a = 360 / float(sides) * float(i);
+
+        shape[i] = shape[0] * get_matrix(a);
+
+        shape[i].x /= adsk_result_frameratio;
+        //shape[i].x *= shape_aspect;
+        shape[i] += center;
+
+    }
+
+    shape[0].x /= adsk_result_frameratio;
+    shape[0] += center;
+
+    if (sides < 3) {
+        return 1.0;
+    }
+
+    float s = softness * .001;
+
+    for (int i = 0; i < sides - 1 ; i++) {
+        vec2 top = rotate_shape(st, shape[i], shape_rotation);
+        vec2 left = rotate_shape(st, shape[i+1], shape_rotation);
+        vec2 right = rotate_shape(st, shape[i+2], shape_rotation);
+
+        vec2 uv = bary(st, top, left, right);
+
+        if (uv.x >= 0.0 && uv.y >= 0.0 && uv.x + uv.y < 1.0) {
+            col += 1.0;
+        }
+
+        if (uv.x > 0.0 && uv.x < s) { // bottom side
+                col *= smoothstep(0.0, s, uv.x);
+            }
+
+            if (uv.y < s && uv.y > 0.0) { // left side
+                col *= smoothstep(0.0, s, uv.y);
+            }
+
+            if (uv.x + uv.y < 1.0 && uv.x + uv.y > 1.0 - s) {
+                col *= 1.0 - smoothstep(1.0 - s, 1.0, uv.x + uv.y); // right size
+            }
+
+
+        col = clamp(col, 0.0, 1.0);
+
+        if (sides > 4) {
+            vec2 top = rotate_shape(st, center, shape_rotation);
+            vec2 left = rotate_shape(st, shape[i], shape_rotation);
+            vec2 right = rotate_shape(st, shape[i+2], shape_rotation);
+
+            uv = bary(st, top, left, right);
+
+            if (uv.x >= 0.0 && uv.y >= 0.0 && uv.x + uv.y < 1.0) {
+                col += 1.0;
+            }
+
+        col = clamp(col, 0.0, 1.0);
+        }
+    }
+
+
+
+    return col;
+}
+
+vec3 multi_shape(vec2 st)
+{
+    float shape = 0.0;
+    float angle_offset = 1.0 / float(num_shapes);
+    float shape_angle = 360.0 / float(sides) * angle_offset;
+    vec2 top = vec2(.5, .5 + shape_size * .5);
+
+
+    for (int i = 1; i <= num_shapes; i++) {
+        shape += draw_shape(st, top);
+        top = rotate_shape(st, top, shape_angle);
+    }
+
+    if (clamp_shape) {
+        shape = clamp(shape, 0.0, 1.0);
+    }
+
+    vec3 color_out = mix(shape_color1, shape_color2, shape);
+
+	return color_out;
+}
+
 
 void main(void)
 {
@@ -560,7 +710,8 @@ void main(void)
 		matte_out = luminance(col);
 		col = make_overlays(st, col, show_gpalette, false);
 	} else if (process == 6) {
-		col = shape(st).rgb;
+		//SHAPE
+		col = multi_shape(st);
 	} else if (process == 7) {
 		col = grid(st);
 		matte_out = col.r;
