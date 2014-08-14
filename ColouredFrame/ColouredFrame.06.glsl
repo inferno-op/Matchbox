@@ -564,6 +564,8 @@ void main(void)
 	} else if (process == 7) {
 		col = grid(st);
 		matte_out = col.r;
+	} else if (process == 8) {
+		col = vec3(st.r, st.g, 0.0);
 	}
 
 	if (result == 2) {

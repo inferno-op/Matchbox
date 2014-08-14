@@ -1,7 +1,4 @@
 <ShaderNodePreset SupportsAdaptiveDegradation="0" LimitInputsToTexture="True" Version="1" Description="
-Latest binaries here: https://github.com/noesclavo/Matchbox/releases/
-
-2015 Only
 This Matchbox shader creates Colors, Noise, Checkerboards, Colorbars, Colorwheels, Gradients and Shapesto get you started.
 
 Version: 1.2
@@ -239,6 +236,8 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="ColouredF
             <PopupEntry Title="Shape" Value="6">
             </PopupEntry>
             <PopupEntry Title="Grid" Value="7">
+            </PopupEntry>
+            <PopupEntry Title="ST Map" Value="8">
             </PopupEntry>
         </Uniform>
 
