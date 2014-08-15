@@ -649,7 +649,7 @@ float draw_shape(vec2 st, vec2 top)
     return col;
 }
 
-vec3 multi_shape(vec2 st)
+vec4 multi_shape(vec2 st)
 {
     float shape = 0.0;
     float angle_offset = 1.0 / float(num_shapes);
@@ -668,7 +668,7 @@ vec3 multi_shape(vec2 st)
 
     vec3 color_out = mix(shape_color1, shape_color2, shape);
 
-	return color_out;
+	return vec4(color_out, shape);
 }
 
 
@@ -714,7 +714,9 @@ void main(void)
 		col = make_overlays(st, col, show_gpalette, false);
 	} else if (process == 6) {
 		//SHAPE
-		col = multi_shape(st);
+		vec4 tmp = multi_shape(st);
+		col = tmp.rgb;
+		matte_out = tmp.a;
 	} else if (process == 7) {
 		col = grid(st);
 		matte_out = col.r;
