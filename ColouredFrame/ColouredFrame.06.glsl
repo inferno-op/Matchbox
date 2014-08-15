@@ -196,7 +196,10 @@ vec3 colorwheel(vec2 st) {
 	col.g =  d / rad;
 	col.b = cw_val;
 
-	return hsv2rgb(col) * vec3(circle);
+	col = hsv2rgb(col) * vec3(circle);
+	col = clamp(col, 0.0, 1.0);
+
+	return col;
 }
 
 //OVERLAYS

@@ -420,7 +420,8 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="ColouredF
          </SubUniform>
       </Uniform>
 
-		<Uniform Row="4" Col="3" Page="0" Default="False" Tooltip="" DisplayName="clamp_shape" Type="bool" Name="clamp_shape">
+		<Uniform Row="4" Col="3" Page="0" Default="False" Tooltip="" DisplayName="Clamp Shapes" Type="bool" Name="clamp_shape"
+			UIConditionSource="process" UIConditionValue="6" UIConditionInvert="False" UIConditionType="Hide">
       </Uniform>
 
    </Shader>
