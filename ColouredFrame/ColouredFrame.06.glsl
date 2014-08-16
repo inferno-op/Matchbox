@@ -71,14 +71,19 @@ uniform vec3 shape_color1;
 uniform vec3 shape_color2;
 uniform bool clamp_shape;
 
-
-
-// start grid
+//Grid
 uniform float g_sizeProp, g_lineProp, g_rotation, g_line;
 uniform bool g_propwidth, g_propgridsize, g_invert;
 uniform vec2 g_size;
 uniform vec3 g_gridcolor, g_backcolor;
-//end grid
+
+// Chrome Uniforms
+uniform vec2 chrome_center;
+uniform float chrome_zoom, chrome_detail, chrome_speed, chrome_offset;
+uniform bool static_chrome;
+float chrome_time = time *.5 * chrome_speed + 200. + chrome_offset;
+
+
 
 
 vec2 texel = vec2(1.0) / res;
@@ -671,6 +676,22 @@ vec4 multi_shape(vec2 st)
 	return vec4(color_out, shape);
 }
 
+vec3 chrome(vec2 p)
+{
+  for(int i=1;i<12;i++)
+  {
+    vec2 newp=p;
+	if ( static_chrome )
+		chrome_time = chrome_offset + 200.;
+	
+    newp.x+=1./float(i)*sin(float(i)* chrome_detail/2.2 *p.y+chrome_time*.1)+1.;
+    newp.y+=1./float(i)*cos(float(i)* chrome_detail/2.2 *p.x+chrome_time*.1)-1.;
+    p=newp;
+  }
+  vec3 col= vec3(sin(p.x+p.y)*.5 + .5);
+	return col;
+}
+
 
 void main(void)
 {
@@ -722,7 +743,11 @@ void main(void)
 		matte_out = col.r;
 	} else if (process == 8) {
 		col = vec3(st.r, st.g, 0.0);
+	} else if (process == 9 ) {
+		vec2 p = 10. * (((gl_FragCoord.xy / res.xy) - 0.5) * chrome_zoom) + chrome_center;
+		col = chrome(p);
 	}
+	
 
 	if (result == 2) {
 		float matte = texture2D(adsk_results_pass3, st).r;
