@@ -81,6 +81,7 @@ uniform vec3 g_gridcolor, g_backcolor;
 uniform vec2 chrome_center;
 uniform float chrome_zoom, chrome_detail, chrome_speed, chrome_offset;
 uniform bool static_chrome;
+uniform int chrome_type;
 float chrome_time = time *.5 * chrome_speed + 200. + chrome_offset;
 
 
@@ -678,18 +679,39 @@ vec4 multi_shape(vec2 st)
 
 vec3 chrome(vec2 p)
 {
-  for(int i=1;i<12;i++)
-  {
-    vec2 newp=p;
-	if ( static_chrome )
-		chrome_time = chrome_offset + 200.;
-	
-    newp.x+=1./float(i)*sin(float(i)* chrome_detail/2.2 *p.y+chrome_time*.1)+1.;
-    newp.y+=1./float(i)*cos(float(i)* chrome_detail/2.2 *p.x+chrome_time*.1)-1.;
-    p=newp;
-  }
-  vec3 col= vec3(sin(p.x+p.y)*.5 + .5);
-	return col;
+	if (chrome_type == 0) {
+		for(int i=1;i<12;i++)
+		{
+			vec2 newp=p;
+			if ( static_chrome )
+				chrome_time = chrome_offset + 200.;
+			newp.x+=1./float(i)*sin(float(i)* chrome_detail/2.2 *p.y+chrome_time*.1)+1.;
+			newp.y+=1./float(i)*cos(float(i)* chrome_detail/2.2 *p.x+chrome_time*.1)-1.;
+			p=newp;
+		}
+		vec3 col= vec3(sin(p.x+p.y)*.5 + .5);
+		return col;
+		
+	} else if (chrome_type == 1) {	
+		int iter = int(7 * chrome_detail);
+		p = p * .5;
+		vec2 i = p;
+		float c = 0.0;
+		float inten = 1.0;
+
+		for (int n = 0; n < iter; n++) 
+		{
+			float t = (chrome_time * .1 * (1.0 - (1.0 / float(n+1)))) + 20.;
+			if ( static_chrome )
+				chrome_time = chrome_offset + 200;
+			i = (p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x))) - (i - (1.0 / vec2(n+1)));
+			c += 1.0/length((p*i) / vec2(sin(i.x + t)/inten, cos(i.y + t) / inten));
+		}
+		c /= float(iter);
+		c = smoothstep (0.00001, 1., c);
+		vec3 col = vec3(c);
+		return col;
+	}
 }
 
 

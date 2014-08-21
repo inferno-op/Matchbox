@@ -372,20 +372,20 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="ColouredF
         </Uniform>
 	
 		<!-- Chrome -->
-         <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="0" Col="1" Page="0" DisplayName="Speed" Type="float" Name="chrome_speed"
+         <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="2" Col="1" Page="0" DisplayName="Speed" Type="float" Name="chrome_speed"
 			 UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
          </Uniform>
-         <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="1" Col="1" Page="0" DisplayName="Offset" Type="float" Name="chrome_offset"
+         <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0" Inc="0.01" Tooltip="" Row="3" Col="1" Page="0" DisplayName="Offset" Type="float" Name="chrome_offset"
 			 UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
          </Uniform>
-         <Uniform Row="2" Col="1" Page="0" Default="False" Tooltip="" DisplayName="Static Chrome" Type="bool" Name="static_chrome"
+         <Uniform Row="1" Col="1" Page="0" Default="False" Tooltip="" DisplayName="Static Chrome" Type="bool" Name="static_chrome"
 			 UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
          </Uniform>
 
          <Uniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="1.0" Inc="0.01" Tooltip="" Row="0" Col="2" Page="0" DisplayName="Zoom" Type="float" Name="chrome_zoom"
 			 UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
          </Uniform>
-         <Uniform ResDependent="None" Max="1000000.0" Min="0.0" Default="1.0" Inc="0.01" Tooltip="" Row="1" Col="2" Page="0" DisplayName="Detail" Type="float" Name="chrome_detail"
+         <Uniform ResDependent="None" Max="3.0" Min="0.1" Default="1.0" Inc="0.01" Tooltip="" Row="1" Col="2" Page="0" DisplayName="Detail" Type="float" Name="chrome_detail"
 			 UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
          </Uniform>
          <Uniform Inc="0.1" Tooltip="" Row="2" Col="2" Page="0" DisplayName="Center" IconType="Axis" Type="vec2" Name="chrome_center"
@@ -395,6 +395,20 @@ Matchbox version by miles@noesclavo.com and ivar@inferno-op.com" Name="ColouredF
              <SubUniform ResDependent="None" Max="1000000.0" Min="-1000000.0" Default="0.0">
              </SubUniform>
           </Uniform>
+		  
+		  
+  	 	<Uniform Max="1000000" Min="0" Default="0" Inc="1" Tooltip="" Row="0" Col="1" Page="0" DisplayName="Type" Type="int" Name="chrome_type" ValueType="Popup"
+  	 		UIConditionSource="process" UIConditionValue="9" UIConditionInvert="False" UIConditionType="Hide">
+              <PopupEntry Title="Stripes" Value="0">
+              </PopupEntry>
+              <PopupEntry Title="Water" Value="1">
+              </PopupEntry>
+        	</Uniform>
+			
+			
+			
+			
+			
 		 
 	
 	
