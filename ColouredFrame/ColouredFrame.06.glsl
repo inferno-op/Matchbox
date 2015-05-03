@@ -770,7 +770,8 @@ void main(void)
 		col = chrome(p);
 	}
 	
-
+	if (result == 1)
+		col = color;
 	if (result == 2) {
 		float matte = texture2D(adsk_results_pass3, st).r;
 		col = mix(front, col, matte);
